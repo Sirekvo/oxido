@@ -11,9 +11,11 @@ const openai = new OpenAI({
 function readArticleFile(filePath) {
     return fs.readFileSync(filePath, 'utf8');
   }
-  
-async function generate() {
+
+async function generateText() {
     try {
+        const articleContent = readArticleFile(articleFilePath);
+        console.log(articleContent)
         const response = await openai.chat.completions.create({
             model: 'gpt-3.5-turbo',
             messages: [{ role: 'user', content: 'Napisz przykładowy wiersz.' }],
@@ -27,4 +29,5 @@ async function generate() {
     }
 }
 
-generate();
+  const articleFilePath = "tresc_artykulu.txt";
+  generateText(articleFilePath)
