@@ -15,14 +15,24 @@ function readArticleFile(filePath) {
 async function generateText() {
     try {
         const articleContent = readArticleFile(articleFilePath);
-        console.log(articleContent)
+
+        const prompt = `
+        Przekonwertuj poniższy artykuł na kod HTML. 
+        - Użyj odpowiednich tagów HTML, takich jak <h1>, <h2>, <p>, itp., aby strukturyzować treść.
+        - W miejscach, które sugerują użycie grafiki, wstaw tag <img> z src="image_placeholder.jpg" i atrybutem alt opisującym obraz. 
+        - Dodaj podpisy pod grafikami przy użyciu tagu <figcaption>.
+        - Zwróć **tylko** zawartość, którą należy wstawić między tagi <body> i </body> (bez <html>, <head> ani <body>).
+        - Nie dodawaj żadnego kodu CSS ani JavaScript.
+        Treść artykułu:
+        
+        ${articleContent}
+        `;
+
         const response = await openai.chat.completions.create({
             model: 'gpt-3.5-turbo',
-            messages: [{ role: 'user', content: 'Napisz przykładowy wiersz.' }],
-            max_tokens: 50,
+            messages: [{ role: "user", content: prompt }],
         });
         const generatedText = response.choices[0].message.content;
-        console.log(generatedText);
         fs.writeFileSync('artykul.html', generatedText, 'utf8');
     } catch (error) {
         console.error('Error:', error);
