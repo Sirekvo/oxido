@@ -8,15 +8,16 @@ const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
 });
 
-function readArticleFile(filePath) {
+const getArticleContentFromFile = (filePath) => {
     return fs.readFileSync(filePath, 'utf8');
-  }
+}
 
-async function generateText() {
-    try {
-        const articleContent = readArticleFile(articleFilePath);
+const saveToFile = (filePath, generatedText) => {
+    fs.writeFileSync(filePath, generatedText, 'utf8');
+}
 
-        const prompt = `
+const preparePrompt = (articleContent) => {
+    return `
         Przekonwertuj poniższy artykuł na kod HTML. 
         - Użyj odpowiednich tagów HTML, takich jak <h1>, <h2>, <p>, itp., aby strukturyzować treść.
         - W miejscach, które sugerują użycie grafiki, wstaw tag <img> z src="image_placeholder.jpg" i atrybutem alt opisującym obraz. 
@@ -27,17 +28,25 @@ async function generateText() {
         
         ${articleContent}
         `;
+}
 
-        const response = await openai.chat.completions.create({
+const generateText = async () => {
+    try {
+        const articleContent = getArticleContentFromFile("tresc_artykulu.txt");
+
+        const prompt = preparePrompt(articleContent);
+
+        const apiResponse = await openai.chat.completions.create({
             model: 'gpt-3.5-turbo',
             messages: [{ role: "user", content: prompt }],
         });
-        const generatedText = response.choices[0].message.content;
-        fs.writeFileSync('artykul.html', generatedText, 'utf8');
+        const generatedText = apiResponse.choices[0].message.content;
+
+        saveToFile('artykul.html', generatedText)
     } catch (error) {
+        // Handle error
         console.error('Error:', error);
     }
 }
 
-  const articleFilePath = "tresc_artykulu.txt";
-  generateText(articleFilePath)
+generateText()
